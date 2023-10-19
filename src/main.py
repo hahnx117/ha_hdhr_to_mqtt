@@ -5,8 +5,9 @@ import json
 import socket
 from datetime import datetime
 import time
+import os
 
-HDHR_IP = ""
+HDHR_IP = os.environ['HDHR_IP']
 BASEURL = f"http://{HDHR_IP}"
 
 ## CREATE DISCOVERY OBJECTS AND TOPICS ##
@@ -148,9 +149,9 @@ def tuners_active(status):
 if __name__ == "__main__":
     status = get_status()
 
-    print(f"Number of tuners on device: {num_tuners(status)}")
-    print("\n")
-    print(f"Tuners active: {tuners_active(status)}")
+    #print(f"Number of tuners on device: {num_tuners(status)}")
+    #print("\n")
+    #print(f"Tuners active: {tuners_active(status)}")
 
 
     data_dict = {
@@ -158,17 +159,17 @@ if __name__ == "__main__":
         'VctNumber': "Unavailable",
         'VctName': "Unavailable", 
         'Frequency': "Unavailable",
-        'SignalStrengthPercent': "Unavailable",
-        'SignalQualityPercent': "Unavailable",
-        'SymbolQualityPercent': "Unavailable",
+        'SignalStrengthPercent': 0,
+        'SignalQualityPercent': 0,
+        'SymbolQualityPercent': 0,
         'TargetIP': "Unavailable",
         'NetworkRate': "Unavailable",
     }
 
-    mqtt_host = ""
-    mqtt_port = ""
-    mqtt_user = ""
-    mqtt_password = ""
+    mqtt_host = os.environ['MQTT_HOST']
+    mqtt_port = os.environ['MQTT_PORT']
+    mqtt_user = os.environ['MQTT_USER']
+    mqtt_password = os.environ['MQTT_PASSWORD']
 
     hostname = socket.gethostname()
 
@@ -197,7 +198,7 @@ if __name__ == "__main__":
                 client.publish(sensor_topic, sensor_payload, qos=1, retain=True)
                 client.publish(status_topic, device_status, qos=1, retain=True)
 
-                pprint(topic_dict)
+            #    pprint(topic_dict)
             else:
                 topic_dict['payload'] = data_dict
                 topic_dict['payload']['Resource'] = i['Resource']
@@ -206,8 +207,8 @@ if __name__ == "__main__":
                 client.publish(sensor_topic, sensor_payload, qos=1, retain=True)
                 client.publish(status_topic, device_status, qos=1, retain=True)
 
-                pprint(topic_dict)
-            print('\n')
+            #    pprint(topic_dict)
+            #print('\n')
         
             topic_dict = None
         time.sleep(15)
