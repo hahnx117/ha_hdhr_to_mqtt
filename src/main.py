@@ -217,6 +217,7 @@ if __name__ == "__main__":
                 topic_dict['payload']['Resource'] = i['Resource']
                 topic_dict['payload']['ReportTime'] = datetime.now().strftime("%a %B %d %H:%M")
                 device_status = 'Not In Use'
+                topic_dict['payload']['status'] = device_status
                 sensor_payload = json.dumps(topic_dict)
                 client.publish(sensor_topic, sensor_payload, qos=1, retain=True)
                 client.publish(status_topic, device_status, qos=1, retain=True)
