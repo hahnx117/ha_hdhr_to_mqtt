@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  ha_hdhr_to_mqtt:
+    container_name: hdhr_to_mqtt
+    image: ha_hdhr_to_mqtt:1.0
+    env_file: .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      #- /etc/timezone:/etc/timezone:ro
+      #- ./logs:/logs

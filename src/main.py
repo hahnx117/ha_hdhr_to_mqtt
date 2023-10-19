@@ -6,12 +6,23 @@ import socket
 from datetime import datetime
 import time
 import os
+import logging
+import sys
+
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s:%(levelname)s: %(message)s", datefmt="%b %d %Y %H:%M:%S")
+handler.setFormatter(formatter)
+log.addHandler(handler)
 
 HDHR_IP = os.environ['HDHR_IP']
 BASEURL = f"http://{HDHR_IP}"
 
-## CREATE DISCOVERY OBJECTS AND TOPICS ##
 
+## CREATE DISCOVERY OBJECTS AND TOPICS ##
 
 def register_devices_using_discovery(tunerid, mqtt_client):
 
@@ -149,11 +160,6 @@ def tuners_active(status):
 if __name__ == "__main__":
     status = get_status()
 
-    #print(f"Number of tuners on device: {num_tuners(status)}")
-    #print("\n")
-    #print(f"Tuners active: {tuners_active(status)}")
-
-
     data_dict = {
         'Resource': '',
         'VctNumber': "Unavailable",
@@ -182,10 +188,13 @@ if __name__ == "__main__":
 
     while True:
         status = get_status()
+        logging.info(f"HDHR_IP: {HDHR_IP}")
+        logging.info(f"BASEURL: {BASEURL}")
+        logging.info(f"Number of total tuners: {num_tuners(status)}")
+        logging.info(f"Number of active tuners: {tuners_active(status)}")
         for i in status:
             register_devices_using_discovery(i['Resource'], client)
 
-            i['ReportTime'] = datetime.now().strftime("%a %B %d %H:%M")
             sensor_topic = f"{i['Resource']}/sensor"
             status_topic = f"{i['Resource']}/status"
             topic_dict = {'topic': sensor_topic, 'payload': {}}
@@ -194,21 +203,28 @@ if __name__ == "__main__":
                 device_status = "In Use"
                 topic_dict['payload'] = i
                 topic_dict['payload']['status'] = 'In Use'
+                topic_dict['payload']['ReportTime'] = datetime.now().strftime("%a %B %d %H:%M")
                 sensor_payload = json.dumps(topic_dict)
                 client.publish(sensor_topic, sensor_payload, qos=1, retain=True)
                 client.publish(status_topic, device_status, qos=1, retain=True)
-
-            #    pprint(topic_dict)
+                logging.info(f"sensor_topic: {sensor_topic}")
+                logging.info(f"sensor_payload:")
+                logging.info(sensor_payload)
+                logging.info(f"status_topic: {status_topic}")
+                logging.info(f"tuner0_device_status: {device_status}")
             else:
                 topic_dict['payload'] = data_dict
                 topic_dict['payload']['Resource'] = i['Resource']
+                topic_dict['payload']['ReportTime'] = datetime.now().strftime("%a %B %d %H:%M")
                 device_status = 'Not In Use'
                 sensor_payload = json.dumps(topic_dict)
                 client.publish(sensor_topic, sensor_payload, qos=1, retain=True)
                 client.publish(status_topic, device_status, qos=1, retain=True)
-
-            #    pprint(topic_dict)
-            #print('\n')
+                logging.info(f"sensor_topic: {sensor_topic}")
+                logging.info(f"sensor_payload:")
+                logging.info(sensor_payload)
+                logging.info(f"status_topic: {status_topic}")
+                logging.info(f"tuner1_device_status: {device_status}")
         
             topic_dict = None
         time.sleep(15)
