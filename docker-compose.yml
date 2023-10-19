@@ -7,3 +7,4 @@ services:
     env_file: .env
     volumes:
       - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
